@@ -1,34 +1,33 @@
-const express = require('express');
-const router = express.Router();
-const fs = require('fs');
-const path = require('path');
+const notes = require('express').Router();
+const { readFromFile, readAndAppend } = require('../helpers/fsUtils');
+const uuid = require('../helpers/uuid');
 
-// API route to retrieve notes
-router.get('/api/notes', (req, res) => {
-  const notesData = fs.readFileSync(path.join(__dirname, '../db/db.json'));
-  const notes = JSON.parse(notesData);
-  res.json(notes);
-});
 
-// API route to save a new note
-router.post('/api/notes', (req, res) => {
-  const notesData = fs.readFileSync(path.join(__dirname, '../db/db.json'));
-  const notes = JSON.parse(notesData);
-  const newNote = req.body;
-  newNote.id = notes.length + 1; // Assign a unique ID to the new note
-  notes.push(newNote);
-  fs.writeFileSync(path.join(__dirname, '../db/db.json'), JSON.stringify(notes));
-  res.json(newNote);
-});
+// GET Route for retrieving all the tips
+notes.get('/notes/', (req, res) => {
+    console.info(`${req.method} request received for tips`);
+    readFromFile('./db/db.json').then((data) => res.json(JSON.parse(data)));
+  });
 
-// API route to delete a note
-router.delete('/api/notes/:id', (req, res) => {
-  const notesData = fs.readFileSync(path.join(__dirname, '../db/db.json'));
-  const notes = JSON.parse(notesData);
-  const noteId = parseInt(req.params.id);
-  const updatedNotes = notes.filter((note) => note.id !== noteId);
-  fs.writeFileSync(path.join(__dirname, '../db/db.json'), JSON.stringify(updatedNotes));
-  res.json({ message: 'Note deleted successfully' });
-});
+  // POST Route for a new UX/UI tip
+notes.post('/notes/', (req, res) => {
+    console.info(`${req.method} request received to add a tip`);
+    console.log(req.body);
 
-module.exports = router;
+    const { title, text } = req.body;
+
+    if (req.body) {
+      const newNote = {
+        title: title,
+        text: text,
+        notes_id: uuid(),
+      };
+
+      readAndAppend(newNote, './db/db.json');
+      res.json(`Note added successfully 🚀`);
+    } else {
+      res.error('Error in adding note');
+    }
+  });
+
+  module.exports = notes;

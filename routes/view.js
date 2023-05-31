@@ -1,10 +1,13 @@
 const express = require('express');
-const router = express.Router();
-const path = require('path');
+const view = require('express').Router();
+const { readFromFile, readAndAppend } = require('../helpers/fsUtils');
+const uuid = require('../helpers/uuid');
 
-// Route to display the notes page
-router.get('/notes', (req, res) => {
-  res.sendFile(path.join(__dirname, '../notes.html'));
-});
+// GET Route for retrieving all the notes
+view.get('/notes/', (req, res) => {
+    console.info(`${req.method} notes request received`);
+    //readFromFile('./db/db.json').then((data) => res.json(JSON.parse(data)));
+    res.sendFile('notes.html', { root: 'public' });
+  });
 
-module.exports = router;
+  module.exports = view;

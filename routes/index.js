@@ -1,9 +1,12 @@
 const express = require('express');
-const router = express.Router();
 
-// Home page route
-router.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../index.html'));
-});
+const notesRouter = require('./notes.js');
+const viewRouter = require('./view.js');
 
-module.exports = router;
+const app = express();
+
+app.use('/api', notesRouter);
+
+app.use('/', viewRouter);
+
+module.exports = app;
